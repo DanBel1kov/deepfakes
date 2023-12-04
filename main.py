@@ -185,5 +185,4 @@ if __name__ == '__main__':
     df = study.trials_dataframe()
     df.to_csv('models/optuna_results.csv', index=False)
     fig = optuna.visualization.plot_intermediate_values(study)
-    plt.savefig('foo.png')
     fig.show()
