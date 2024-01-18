@@ -66,10 +66,28 @@ class ImageDatasetFullyRAM(Dataset):  # loads the WHOLE dataset into RAM
 class ConvNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer1 = nn.Sequential(nn.Conv2d(3, 32, kernel_size=5, stride=3, padding=2),
-                                    nn.ReLU(), nn.MaxPool2d(kernel_size=2, stride=2))
-        self.layer2 = nn.Sequential(nn.Conv2d(32, 64, kernel_size=5, stride=3, padding=2),
-                                    nn.ReLU(), nn.MaxPool2d(kernel_size=2, stride=2))
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(
+                3,
+                32,
+                kernel_size=5,
+                stride=3,
+                padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(
+                kernel_size=2,
+                stride=2))
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(
+                32,
+                64,
+                kernel_size=5,
+                stride=3,
+                padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(
+                kernel_size=2,
+                stride=2))
         self.drop_out = nn.Dropout(0.2)
         self.fc1 = nn.Linear(18496, 1000)
         self.fc2 = nn.Linear(1000, 1)
@@ -88,12 +106,14 @@ class ConvNet(nn.Module):
 NUM_EPOCHS = 50
 
 print('Loading datasets. This may take some time... (check your RAM usage xd)')
-image_transform = torchvision.transforms.Compose([torchvision.transforms.ToPILImage(),
-                                                  torchvision.transforms.ToTensor()])
-training_data = ImageDatasetFullyRAM('data\\training', transform=image_transform)
+image_transform = torchvision.transforms.Compose(
+    [torchvision.transforms.ToPILImage(), torchvision.transforms.ToTensor()])
+training_data = ImageDatasetFullyRAM(
+    'data\\training', transform=image_transform)
 train_dataloader = DataLoader(
     training_data, batch_size=64, shuffle=True, num_workers=0)
-validation_data = ImageDatasetFullyRAM('data\\validation', transform=image_transform)
+validation_data = ImageDatasetFullyRAM(
+    'data\\validation', transform=image_transform)
 validation_dataloader = DataLoader(
     validation_data, batch_size=100, shuffle=True, num_workers=0)
 print('Datasets are loaded')
