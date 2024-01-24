@@ -11,7 +11,7 @@ from tqdm import tqdm
 torch.manual_seed(69)
 
 TRAINING_FOLDER = 'data/training'
-TEST_FOLDER = 'data/validation'
+TEST_FOLDER = 'data/test'
 
 transform2 = transforms.Compose(
     [
@@ -28,7 +28,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 
 def evaluate_model(model):
-    '''Evaluate model accuracy using validation dataset'''
+    '''Evaluate model accuracy using test dataset'''
     class_correct = [0, 0]
     class_total = [0, 0]
     best_acc = 0.0

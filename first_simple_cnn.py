@@ -165,7 +165,7 @@ def objective(current_trial):
                 loss_list.append(loss.item())
                 acc_list.append(correct / total)
 
-        # validation
+        # test
         correct_count = 0
         for i, (images, labels) in enumerate(validation_dataloader):
             if device.type == 'cuda':
