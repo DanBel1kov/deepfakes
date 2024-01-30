@@ -12,6 +12,7 @@ from torch import optim
 
 import optuna
 from optuna.trial import TrialState
+from models.ImageDatasetFullyRAM import ImageDatasetFullyRAM
 
 
 class ImageDataset(Dataset):
@@ -36,31 +37,6 @@ class ImageDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image, label
-
-
-class ImageDatasetFullyRAM(Dataset):  # loads the WHOLE dataset into RAM
-    def __init__(self, data_dir, transform=None):
-        self.data_dir = data_dir
-        self.files = os.listdir(os.path.join(self.data_dir, 'fake'))
-        self.files.extend(os.listdir(os.path.join(self.data_dir, 'real')))
-        self.items = []
-        for file in self.files:
-            label = 0 if 'real' in file else 1  # 0=REAL, 1=FAKE
-            if label == 1:
-                image = read_image(os.path.join(self.data_dir, 'fake', file))
-            else:
-                image = read_image(os.path.join(self.data_dir, 'real', file))
-
-            if transform:
-                image = transform(image)
-
-            self.items.append((image, label))
-
-    def __len__(self):
-        return len(self.files)
-
-    def __getitem__(self, idx):
-        return self.items[idx]
 
 
 class ConvNet(nn.Module):

@@ -1,6 +1,5 @@
 from torch import nn
 from torch import flatten
-import torch.nn.functional as F
 
 
 class ConvNet(nn.Module):
