@@ -4,6 +4,7 @@ from torch import nn, optim
 from torchvision import transforms, datasets, models
 from tqdm import tqdm
 from models.ConvNet import ConvNet
+from models.ImageDatasetFullyRAM import ImageDatasetFullyRAM
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -13,16 +14,18 @@ def train_test_dataloader(fp='data'):
     transform2 = transforms.Compose(
 
         [
+            transforms.Resize((256, 256)),
             transforms.ToTensor(),
             # transforms.Normalize((0.5, 0.5, 0.5), (0.25, 0.25, 0.25))
         ]
     )
 
-    trainset = datasets.ImageFolder(root=fp + "/train", transform=transform2)
-    _trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True)
+    # trainset = datasets.ImageFolder(root=fp + "/train", transform=transform2)
+    trainset = ImageDatasetFullyRAM(fp + "/train", transform=transform2)
+    _trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
 
     testset = datasets.ImageFolder(root=fp + "/test", transform=transform2)
-    _testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=False)
+    _testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
 
     return _trainloader, _testloader
 
@@ -57,9 +60,11 @@ student_model = ConvNet()
 teacher_model = teacher_model.to(device)
 student_model = student_model.to(device)
 
-optimizer = optim.Adam(student_model.parameters(), lr=0.001)
+optimizer = optim.Adam(student_model.parameters(), lr=0.00003)
 
-for epoch in tqdm(range(10)):
+accs = []
+
+for epoch in tqdm(range(1), leave=False):
     student_model.train()
     running_loss = 0
     for i, (images, labels) in enumerate(tqdm(trainloader)):
@@ -110,4 +115,9 @@ for epoch in tqdm(range(10)):
                 class_total[label] += 1
 
     print(class_correct, class_total)
-    print(sum(class_correct) / sum(class_total))
+    acc = sum(class_correct) / sum(class_total)
+    print(acc)
+    accs.append(acc)
+
+print(accs)
+torch.save(student_model.state_dict(), 'artifacts/student_pro.pt')
