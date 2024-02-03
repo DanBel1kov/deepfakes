@@ -214,6 +214,6 @@ if __name__ == '__main__':
         print(f"    {key}: {value}")
 
     df = study.trials_dataframe()
-    df.to_csv('models/optuna_results.csv', index=False)
+    df.to_csv('models/optuna_results_broad.csv', index=False)
     fig = optuna.visualization.plot_intermediate_values(study)
     fig.show()

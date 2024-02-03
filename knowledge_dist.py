@@ -1,12 +1,15 @@
 """Module for training a ConvNet model using knowledge distillation"""
+import optuna
 import torch
+from optuna.trial import TrialState
 from torch import nn, optim
+from torch.optim import lr_scheduler
 from torchvision import transforms, datasets, models
 from tqdm import tqdm
 from models.ConvNet import ConvNet
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
+torch.manual_seed(69)
 
 def train_test_dataloader(fp='data'):
     """Creates dataloader objects for train and test datasets"""
@@ -75,12 +78,13 @@ def validate_model(_model, _testloader):
     return _acc
 
 
-def know_dist_epoch(_model, _epoch_n, alpha=0.1):
+def know_dist_epoch(_model, _epoch_n, optimizer, teacher_model, lr_scheduler=None, alpha=0.1):
     """Run one epoch of training on a given model inplace
      _epoch_n is used to print the epoch number
      alpha is a coefficient for knowledge distillation"""
     _model.train()
     running_loss = 0
+
     with tqdm(trainloader, leave=False, position=0) as t:
         for i, (images, labels) in enumerate(t):
             images, labels = images.to(device), labels.to(device)
@@ -101,6 +105,8 @@ def know_dist_epoch(_model, _epoch_n, alpha=0.1):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            if lr_scheduler is not None:
+                lr_scheduler.step()
             batch_to_print = 100
             if i % batch_to_print == batch_to_print - 1:
                 t.set_description(f'Epoch: {_epoch_n}, loss: {running_loss / batch_to_print}')
@@ -116,15 +122,16 @@ student_model = ConvNet()
 teacher_model = teacher_model.to(device)
 student_model = student_model.to(device)
 
-optimizer = optim.Adam(student_model.parameters(), lr=0.001)
+optimizer = optim.Adam(student_model.parameters(), lr=0.000947829)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=580, gamma=0.10962742, verbose=False)
 
 accs = []
 
-for epoch in tqdm(range(3), leave=False):
-    know_dist_epoch(student_model, epoch)
+for epoch in tqdm(range(10), leave=False):
+    know_dist_epoch(student_model, epoch, optimizer, teacher_model, exp_lr_scheduler, alpha=0.0515167)
     student_model.eval()
     acc = validate_model(student_model, testloader)
     accs.append(acc)
 
 print(accs)
-torch.save(student_model.state_dict(), f'artifacts/student_pro_{accs[-1]}.pt')
+torch.save(student_model.state_dict(), f'artifacts/student_optuna_{accs[-1]}.pt')
