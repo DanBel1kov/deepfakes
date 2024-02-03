@@ -11,6 +11,7 @@ from models.ConvNet import ConvNet
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 torch.manual_seed(69)
 
+
 def train_test_dataloader(fp='data'):
     """Creates dataloader objects for train and test datasets"""
     transform2 = transforms.Compose(
